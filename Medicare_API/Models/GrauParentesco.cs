@@ -9,5 +9,9 @@ namespace Medicare_API.Models
     {
         private int Id { get; set; }
         private string Descricao { get; set; }
+        public List<Responsavel> Responsavel { get; set; }
+
+        
     }
+
 }

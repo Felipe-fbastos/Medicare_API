@@ -8,7 +8,9 @@ namespace Medicare_API.Models
     public class HistoricoPosologia
     {
         private int IdPosologia { get; set; }
+        private Posologia Posologia { get; set; }
         private int IdRemedio { get; set; }
+        private Remedio Remedio { get; set; }
         private int SdPosologia { get; set; }
     }
 }

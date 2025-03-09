@@ -11,5 +11,6 @@ namespace Medicare_API.Models
         private string Descricao { get; set; }
         private int QtdParcelas { get; set; }
         private int QtdMinimaParcelas { get; set; }
+        private List<Promocao> Promocoes { get; set; }
     }
 }

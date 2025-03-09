@@ -9,5 +9,6 @@ namespace Medicare_API.Models
     {
         private int Id { get; set; }
         private string Nome { get; set; }
+        public List<Remedio> Remedios { get; set; }
     }
 }

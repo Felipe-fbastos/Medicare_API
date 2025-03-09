@@ -10,7 +10,9 @@ namespace Medicare_API.Models
     
         private int Id { get; set; }
         private int IdPosologia { get; set; }
+        private Posologia Posologia { get; set; }
         private int IdRemedio { get; set; }
+        private Remedio Remedio { get; set; }
         private DateTime DtHoraAlarme { get; set; }
         private string Situacao { get; set; }
         

@@ -11,5 +11,6 @@ namespace Medicare_API.Models
         private string Nome { get; set; }
         private string Apelido { get; set; }
         private string CNPJ { get; set; }
+        public ParceiroUtilizador ParceiroUtilizador { get; set; }
     }
 }
