@@ -50,7 +50,19 @@ namespace Medicare_API.Data
             modelBuilder.Entity<Responsavel>().
             HasOne(u => u.Utilizador)
             .WithMany(r => r.Responsaveis)
-            .HasForeignKey(fk => new {fk.IdUtilizador, fk.IdResponsavel});
+            .HasForeignKey(fk => new { fk.IdUtilizador, fk.IdResponsavel });
+
+            modelBuilder.Entity<ParceiroUtilizador>()
+            .HasKey(p => p.IdParceiro);
+
+            modelBuilder.Entity<ParceiroUtilizador>()
+            .HasOne(c => c.colaborador)
+            .WithMany(p => p.ParceiroUtilizadores)
+            .HasForeignKey(fk => new {fk.IdParceiro,fk.IdColaborador} );
+
+
+
+            
 
 
 
