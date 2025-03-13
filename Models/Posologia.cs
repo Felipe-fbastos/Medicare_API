@@ -9,7 +9,7 @@ namespace Medicare_API.Models
     {
         public int Id { get; set; }
         public int IdRemedio { get; set;} 
-        public Remedio remedio { get; set; }
+        public Remedio Remedio { get; set; }
         public int IdUtilizador { get; set; }
         public Utilizador Utilizador { get; set; }
         public DateTime DtInicio { get; set; }

@@ -20,7 +20,7 @@ namespace Medicare_API.Models
         public List<Posologia> Posologias { get; set; } = new();
         public List<HistoricoPosologia> HistoricoPosologias { get; set; } = new();
         public List<Alarme> Alarmes { get; set; } = new();
-        public List<Promocao> Promocaosromocaos { get; set; }
+        public List<Promocao> Promocoes { get; set; }
 
         
 

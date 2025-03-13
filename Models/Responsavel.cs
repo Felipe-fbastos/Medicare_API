@@ -16,6 +16,6 @@ namespace Medicare_API.Models
         public DateTime DtCadastro { get; set; }
         public DateTime DtUltimaAlteracao { get; set; }
         public string Situacao { get; set; }
-        public GrauParentesco GrauParentescos { get; set; }
+       
     }
 }

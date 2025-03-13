@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Threading.Tasks;
+using Azure.Core.GeoJson;
 using Medicare_API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileSystemGlobbing;
+
+
 
 
 namespace Medicare_API.Data
@@ -34,8 +39,11 @@ namespace Medicare_API.Data
         public DbSet<Alarme> ALARMES { get; set; }
 
 
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //Relacionamento de Cuidador e Utilizador
             modelBuilder.Entity<Cuidador>()
             .HasKey(ph => new { ph.IdUtilizador, ph.IdCuidador }); //Definindo Chave Composta
 
@@ -44,6 +52,8 @@ namespace Medicare_API.Data
             WithMany(c => c.Cuidadores)
             .HasForeignKey(fkc => new { fkc.IdUtilizador, fkc.IdCuidador });
 
+            //Relacionamento de Reponsavel e Utilizador
+            //Relacionamento de Reponsavel e Grau Parentesco
             modelBuilder.Entity<Responsavel>().
             HasKey(pk => new { pk.IdUtilizador, pk.IdResponsavel });
 
@@ -52,17 +62,118 @@ namespace Medicare_API.Data
             .WithMany(r => r.Responsaveis)
             .HasForeignKey(fk => new { fk.IdUtilizador, fk.IdResponsavel });
 
+            modelBuilder.Entity<Responsavel>()
+            .HasOne(gp => gp.GrauParentesco)
+            .WithMany(re => re.Responsavel)
+            .HasForeignKey(fk => fk.IdGrauParentesco);
+
+            //Relacionamento de Parceiro Utilizador e Parceiro
+            //Relacionamento de Parceiro Utilizador e Utilizador
             modelBuilder.Entity<ParceiroUtilizador>()
             .HasKey(p => p.IdParceiro);
 
             modelBuilder.Entity<ParceiroUtilizador>()
+            .HasOne(c => c.Parceiro)
+            .WithMany(p => p.ParceiroUtilizador)
+            .HasForeignKey(fk => fk.IdParceiro);
+
+            modelBuilder.Entity<ParceiroUtilizador>()
             .HasOne(c => c.colaborador)
-            .WithMany(p => p.ParceiroUtilizadores)
-            .HasForeignKey(fk => new {fk.IdParceiro,fk.IdColaborador} );
+            .WithMany(pu => pu.ParceiroUtilizadores)
+            .HasForeignKey(fk => fk.IdColaborador);
+
+            ////Relacionamento de Utilizador com Tipo Utilizador
+            modelBuilder.Entity<Utilizador>()
+            .HasOne(tp => tp.TipoUtilizador)
+            .WithMany(u => u.Utilizadores)
+            .HasForeignKey(fk => fk.IdTipoUtilizador);
+
+            //Relacionamento de Posologia e Utilizador
+            //Relacionamento de Posologia e Remédio
+            //Relacionamento de Posologia e Historico Posologia
+            modelBuilder.Entity<Posologia>()
+            .HasOne(u => u.Utilizador)
+            .WithMany(po => po.Posologias)
+            .HasForeignKey(fk => fk.IdUtilizador);
+
+            modelBuilder.Entity<Posologia>()
+            .HasKey(pk => new { pk.Id, pk.IdRemedio }); //Definindo Chave Composta
+
+            modelBuilder.Entity<Posologia>()
+            .HasOne(re => re.Remedio)
+            .WithMany(p => p.Posologias)
+            .HasForeignKey(fk => fk.IdRemedio);
+
+            modelBuilder.Entity<HistoricoPosologia>()
+            .HasKey(pk => new { pk.IdPosologia, pk.IdRemedio });
+
+            modelBuilder.Entity<HistoricoPosologia>()
+            .HasOne(p => p.Posologia)
+            .WithMany(h => h.HistoricoPosologias)
+            .HasForeignKey(fkc => new { fkc.IdPosologia, fkc.IdRemedio });
+
+            //Relacionamento de Alarme e Posologia
+            //Relacionamento de Alarme e Remédio
+            modelBuilder.Entity<Alarme>()
+            .HasKey(pk => pk.Id); //Definindo Chave Composta
+
+            modelBuilder.Entity<Alarme>()
+            .HasOne(p => p.Posologia)
+            .WithMany(a => a.Alarmes)
+            .HasForeignKey(fk => fk.IdPosologia);
+
+            modelBuilder.Entity<Alarme>()
+            .HasOne(p => p.Remedio)
+            .WithMany(a => a.Alarmes)
+            .HasForeignKey(fk => fk.IdRemedio);
+
+            //Relacionamento de Remédio e laboratório
+            //Relacionamento de Remédio e Tipo Grandeza
+            modelBuilder.Entity<Remedio>()
+            .HasOne(la => la.laboratorio)
+            .WithMany(re => re.Remedios)
+            .HasForeignKey(fk => fk.IdLaboratorio);
+
+            modelBuilder.Entity<Remedio>()
+            .HasOne(ga => ga.grandeza)
+            .WithMany(re => re.Remedios)
+            .HasForeignKey(fk => fk.IdGrandeza);
+
+            //Relacionamento de Promoção e Remédio
+            //Relacionamento de Promoção e Colaboradores(Utilizador)
+            //Relacionamento de Promoção e Forma de Pagamento
+            modelBuilder.Entity<Promocao>()
+            .HasKey(pk => pk.Id);
+
+            modelBuilder.Entity<Promocao>()
+            .HasOne(re => re.remedio)
+            .WithMany(po => po.Promocoes)
+            .HasForeignKey(fkre => fkre.IdRemedio);
+
+            modelBuilder.Entity<Promocao>()
+            .HasOne(c => c.colaborador)
+            .WithMany(po => po.Promocoes)
+            .HasForeignKey(fkre => fkre.IdColaborador);
+
+            modelBuilder.Entity<Promocao>()
+            .HasOne(fp => fp.formaDePagamento)
+            .WithMany(po => po.Promocoes)
+            .HasForeignKey(fkre => fkre.formaDePagamento);
 
 
 
-            
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
