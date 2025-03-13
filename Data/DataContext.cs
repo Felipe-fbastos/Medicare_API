@@ -22,6 +22,8 @@ namespace Medicare_API.Data
 
         }
 
+         
+
         public DbSet<Utilizador> UTILIZADOR { get; set; }
         public DbSet<TipoUtilizador> TIPO_UTILIZADOR { get; set; }
         public DbSet<TipoOrdemGrandeza> TIPO_ORDEMGRANDEZA { get; set; }
@@ -155,10 +157,14 @@ namespace Medicare_API.Data
             .WithMany(po => po.Promocoes)
             .HasForeignKey(fkre => fkre.IdColaborador);
 
+/*
             modelBuilder.Entity<Promocao>()
-            .HasOne(fp => fp.formaDePagamento)
-            .WithMany(po => po.Promocoes)
-            .HasForeignKey(fkre => fkre.formaDePagamento);
+            .HasOne(p => p.formaDePagamento) 
+            .WithMany(f => f.Promocoes)    
+            .HasForeignKey(p => p.IdFormaDePagamento); 
+*/
+
+            
 
 
 
