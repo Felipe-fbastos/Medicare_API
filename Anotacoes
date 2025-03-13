@@ -1,0 +1,21 @@
+-Eu tentei fazer a conexão tanto com o somee quanto com o servidor local mas apresentou o erro:
+  The property or navigation 'formaDePagamento' cannot be added to the 'Promocao' type because a 
+  property or navigation with the same name already exists on the 'Promocao' type.
+
+-Fora isso só fiz as controllers: Alarme, cuidador e utilizador;
+
+-Dei uma pesquisada sobre os modelos de projeto:
+    • MVVM: Ideal para aplicações com interfaces mais complexas, onde você realmente precisa separar 
+    a parte visual da lógica por trás.
+    • MVC: Perfeito para aplicações web, onde o controlador pode gerenciar toda a interação entre a interface 
+    e os dados, deixando tudo mais direto e simples.
+    • MVP: Usado principalmente em aplicações desktop, especialmente quando é necessário ter mais controle sobre 
+    a interface, como um gerenciamento mais detalhado da interação do usuário.
+    • Clean Architecture: Se você está lidando com sistemas grandes e complexos, com várias regras de negócio, 
+    esse modelo ajuda a manter tudo organizado e fácil de manter no futuro.
+    • Repository Pattern: Quando você quer manter o código de acesso a dados separado da lógica principal, tornando 
+    o sistema mais limpo e flexível.
+    • DI (Injeção de Dependência): Super útil quando você quer testar melhor suas classes e reduzir o acoplamento 
+    entre os componentes da aplicação.
+    • Microservices: Perfeito para quando a aplicação precisa ser distribuída ou escalada, permitindo que diferentes 
+    partes funcionem de forma independente, mas de maneira coordenada.
