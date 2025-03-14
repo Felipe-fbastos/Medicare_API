@@ -1,0 +1,10 @@
+Relacionamento na DataContext foi concluido
+
+Na Hora de dar dotnet ef database update. joga o seguinte erro: Introducing FOREIGN KEY constraint 
+'FK_CUIDADOR_UTILIZADOR_IdUtilizador' on table 'CUIDADOR' may cause cycles or multiple cascade 
+paths. Specify ON DELETE NO ACTION or ON UPDATE NO ACTION, or modify other FOREIGN KEY constraints.
+Could not create constraint or index. See previous errors.
+
+Favor resolver.
+
+Confie em Jesus Cristo que tudo dará certo, Amém

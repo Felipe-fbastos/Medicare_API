@@ -50,9 +50,15 @@ namespace Medicare_API.Data
             .HasKey(ph => new { ph.IdUtilizador, ph.IdCuidador }); //Definindo Chave Composta
 
             modelBuilder.Entity<Cuidador>().
-            HasOne(u => u.Utilizador).
-            WithMany(c => c.Cuidadores)
-            .HasForeignKey(fkc => new { fkc.IdUtilizador, fkc.IdCuidador });
+            HasOne(u => u.Utilizador)
+            .WithMany()
+            .HasForeignKey(fkc => fkc.IdUtilizador);
+
+            modelBuilder.Entity<Cuidador>()
+            .HasOne(c => c.cuidador)
+            .WithMany()
+            .HasForeignKey(fkc => fkc.IdCuidador)
+            .OnDelete(DeleteBehavior.Restrict);
 
             //Relacionamento de Reponsavel e Utilizador
             //Relacionamento de Reponsavel e Grau Parentesco
@@ -61,8 +67,15 @@ namespace Medicare_API.Data
 
             modelBuilder.Entity<Responsavel>().
             HasOne(u => u.Utilizador)
-            .WithMany(r => r.Responsaveis)
-            .HasForeignKey(fk => new { fk.IdUtilizador, fk.IdResponsavel });
+            .WithMany()
+            .HasForeignKey(fk =>  fk.IdUtilizador)
+            ;
+
+            modelBuilder.Entity<Responsavel>()
+            .HasOne(r => r.responsavel)
+            .WithMany()
+            .HasForeignKey(fkc => fkc.IdResponsavel)
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Responsavel>()
             .HasOne(gp => gp.GrauParentesco)
@@ -117,12 +130,12 @@ namespace Medicare_API.Data
             //Relacionamento de Alarme e Posologia
             //Relacionamento de Alarme e Remédio
             modelBuilder.Entity<Alarme>()
-            .HasKey(pk => pk.Id); //Definindo Chave Composta
+            .HasKey(pk => pk.Id); 
 
             modelBuilder.Entity<Alarme>()
             .HasOne(p => p.Posologia)
             .WithMany(a => a.Alarmes)
-            .HasForeignKey(fk => fk.IdPosologia);
+            .HasForeignKey(a => new { a.IdPosologia, a.IdRemedio });
 
             modelBuilder.Entity<Alarme>()
             .HasOne(p => p.Remedio)
