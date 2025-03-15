@@ -44,7 +44,7 @@ namespace Medicare_API.Data
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        {   
             //Relacionamento de Cuidador e Utilizador
             modelBuilder.Entity<Cuidador>()
             .HasKey(ph => new { ph.IdUtilizador, ph.IdCuidador }); //Definindo Chave Composta
@@ -52,7 +52,8 @@ namespace Medicare_API.Data
             modelBuilder.Entity<Cuidador>().
             HasOne(u => u.Utilizador)
             .WithMany()
-            .HasForeignKey(fkc => fkc.IdUtilizador);
+            .HasForeignKey(fkc => fkc.IdUtilizador)
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Cuidador>()
             .HasOne(c => c.cuidador)
@@ -69,7 +70,7 @@ namespace Medicare_API.Data
             HasOne(u => u.Utilizador)
             .WithMany()
             .HasForeignKey(fk =>  fk.IdUtilizador)
-            ;
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Responsavel>()
             .HasOne(r => r.responsavel)
@@ -80,7 +81,8 @@ namespace Medicare_API.Data
             modelBuilder.Entity<Responsavel>()
             .HasOne(gp => gp.GrauParentesco)
             .WithMany(re => re.Responsavel)
-            .HasForeignKey(fk => fk.IdGrauParentesco);
+            .HasForeignKey(fk => fk.IdGrauParentesco)
+            .OnDelete(DeleteBehavior.Restrict);
 
             //Relacionamento de Parceiro Utilizador e Parceiro
             //Relacionamento de Parceiro Utilizador e Utilizador
@@ -90,18 +92,21 @@ namespace Medicare_API.Data
             modelBuilder.Entity<ParceiroUtilizador>()
             .HasOne(c => c.Parceiro)
             .WithMany(p => p.ParceiroUtilizador)
-            .HasForeignKey(fk => fk.IdParceiro);
+            .HasForeignKey(fk => fk.IdParceiro)
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ParceiroUtilizador>()
             .HasOne(c => c.colaborador)
             .WithMany(pu => pu.ParceiroUtilizadores)
-            .HasForeignKey(fk => fk.IdColaborador);
+            .HasForeignKey(fk => fk.IdColaborador)
+            .OnDelete(DeleteBehavior.Restrict);
 
             ////Relacionamento de Utilizador com Tipo Utilizador
             modelBuilder.Entity<Utilizador>()
             .HasOne(tp => tp.TipoUtilizador)
             .WithMany(u => u.Utilizadores)
-            .HasForeignKey(fk => fk.IdTipoUtilizador);
+            .HasForeignKey(fk => fk.IdTipoUtilizador)
+            .OnDelete(DeleteBehavior.Restrict);
 
             //Relacionamento de Posologia e Utilizador
             //Relacionamento de Posologia e Remédio
@@ -109,7 +114,8 @@ namespace Medicare_API.Data
             modelBuilder.Entity<Posologia>()
             .HasOne(u => u.Utilizador)
             .WithMany(po => po.Posologias)
-            .HasForeignKey(fk => fk.IdUtilizador);
+            .HasForeignKey(fk => fk.IdUtilizador)
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Posologia>()
             .HasKey(pk => new { pk.Id, pk.IdRemedio }); //Definindo Chave Composta
@@ -117,7 +123,8 @@ namespace Medicare_API.Data
             modelBuilder.Entity<Posologia>()
             .HasOne(re => re.Remedio)
             .WithMany(p => p.Posologias)
-            .HasForeignKey(fk => fk.IdRemedio);
+            .HasForeignKey(fk => fk.IdRemedio)
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<HistoricoPosologia>()
             .HasKey(pk => new { pk.IdPosologia, pk.IdRemedio });
@@ -125,7 +132,8 @@ namespace Medicare_API.Data
             modelBuilder.Entity<HistoricoPosologia>()
             .HasOne(p => p.Posologia)
             .WithMany(h => h.HistoricoPosologias)
-            .HasForeignKey(fkc => new { fkc.IdPosologia, fkc.IdRemedio });
+            .HasForeignKey(fkc => new { fkc.IdPosologia, fkc.IdRemedio })
+            .OnDelete(DeleteBehavior.Restrict);
 
             //Relacionamento de Alarme e Posologia
             //Relacionamento de Alarme e Remédio
@@ -135,24 +143,28 @@ namespace Medicare_API.Data
             modelBuilder.Entity<Alarme>()
             .HasOne(p => p.Posologia)
             .WithMany(a => a.Alarmes)
-            .HasForeignKey(a => new { a.IdPosologia, a.IdRemedio });
+            .HasForeignKey(a => new { a.IdPosologia, a.IdRemedio })
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Alarme>()
             .HasOne(p => p.Remedio)
             .WithMany(a => a.Alarmes)
-            .HasForeignKey(fk => fk.IdRemedio);
+            .HasForeignKey(fk => fk.IdRemedio)
+            .OnDelete(DeleteBehavior.Restrict);
 
             //Relacionamento de Remédio e laboratório
             //Relacionamento de Remédio e Tipo Grandeza
             modelBuilder.Entity<Remedio>()
             .HasOne(la => la.laboratorio)
             .WithMany(re => re.Remedios)
-            .HasForeignKey(fk => fk.IdLaboratorio);
+            .HasForeignKey(fk => fk.IdLaboratorio)
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Remedio>()
             .HasOne(ga => ga.grandeza)
             .WithMany(re => re.Remedios)
-            .HasForeignKey(fk => fk.IdGrandeza);
+            .HasForeignKey(fk => fk.IdGrandeza)
+            .OnDelete(DeleteBehavior.Restrict);
 
             //Relacionamento de Promoção e Remédio
             //Relacionamento de Promoção e Colaboradores(Utilizador)
@@ -163,12 +175,14 @@ namespace Medicare_API.Data
             modelBuilder.Entity<Promocao>()
             .HasOne(re => re.remedio)
             .WithMany(po => po.Promocoes)
-            .HasForeignKey(fkre => fkre.IdRemedio);
+            .HasForeignKey(fkre => fkre.IdRemedio)
+            .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Promocao>()
             .HasOne(c => c.colaborador)
             .WithMany(po => po.Promocoes)
-            .HasForeignKey(fkre => fkre.IdColaborador);
+            .HasForeignKey(fkre => fkre.IdColaborador)
+            .OnDelete(DeleteBehavior.Restrict);
 
 /*
             modelBuilder.Entity<Promocao>()

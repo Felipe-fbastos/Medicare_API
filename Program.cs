@@ -15,6 +15,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -48,6 +49,7 @@ app.MapGet("/weatherforecast", () =>
 .WithOpenApi();
 
 app.Run();
+app.MapControllers();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
