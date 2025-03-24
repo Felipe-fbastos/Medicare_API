@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 using Medicare_API.Data;
 using Medicare_API.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -11,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Medicare_API.Controller
 {
+   [Route("[controller]")]
     [ApiController]
-    [Route("[controller]")]
     public class UtilizadorController : ControllerBase
     {
         private readonly DataContext _context;
@@ -22,73 +17,32 @@ namespace Medicare_API.Controller
             _context = context;
         }
 
-        private async Task<bool> EmailExistente(string email)
+        // GET: api/Utilizador
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Utilizador>>> GetUtilizadores()
         {
-            if (await _context.UTILIZADOR.AnyAsync(x => x.Email.ToLower() == email.ToLower()))
-                return true;
-            else
-                return false;
+            return await _context.Utilizadores.ToListAsync();
         }
 
-          private bool UtilizadorExistente(int id)
-        {
-            return _context.UTILIZADOR.Any(u => u.Id == id);
-        }
-
-
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetUtilizadores()
-        {
-            try
-            {
-                List<Utilizador> lista = await _context.UTILIZADOR.ToListAsync();
-                return Ok(lista);
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(ex.Message + " - " + ex.InnerException);
-            }
-        }
-
+        // GET: api/Utilizador/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Utilizador>> GetById(int id){
-
-             try
-            {
-                return Ok (await _context.UTILIZADOR.FindAsync(id));
-            }
-            catch (System.Exception ex)
-            {
-                return BadRequest(ex.Message + " - " + ex.InnerException);
-            }
-
-           
-        }
-
-
-        [HttpPost("Registrar")]
-        public async Task<IActionResult> RegistrarUtilizador(Utilizador utilizador)
+        public async Task<ActionResult<Utilizador>> GetUtilizador(int id)
         {
-            try
-            {
-                if (await EmailExistente(utilizador.Email)) 
-                    throw new System.Exception("O Email do Utilizador já existe");
+            var utilizador = await _context.Utilizadores.FindAsync(id);
 
-                await _context.UTILIZADOR.AddAsync(utilizador);
-                await _context.SaveChangesAsync();
-
-                return Ok(utilizador.Id);
-            }
-            catch (System.Exception ex)
+            if (utilizador == null)
             {
-                return BadRequest(ex.Message + " - " + ex.InnerException);
+                return NotFound();
             }
+
+            return utilizador;
         }
 
+        // PUT: api/Utilizador/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUtilizador(int id, Utilizador utilizador)
         {
-            if (id != utilizador.Id)
+            if (id != utilizador.IdUtilizador)
             {
                 return BadRequest();
             }
@@ -101,7 +55,7 @@ namespace Medicare_API.Controller
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UtilizadorExistente(id))
+                if (!UtilizadorExists(id))
                 {
                     return NotFound();
                 }
@@ -113,22 +67,37 @@ namespace Medicare_API.Controller
 
             return NoContent();
         }
-        
-         [HttpDelete("{id}")]
+
+        // POST: api/Utilizador
+        [HttpPost]
+        public async Task<ActionResult<Utilizador>> PostUtilizador(Utilizador utilizador)
+        {
+            _context.Utilizadores.Add(utilizador);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetUtilizador), new { id = utilizador.IdUtilizador }, utilizador);
+        }
+
+        // DELETE: api/Utilizador/5
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUtilizador(int id)
         {
-            var utilizador = await _context.UTILIZADOR.FindAsync(id);
+            var utilizador = await _context.Utilizadores.FindAsync(id);
             if (utilizador == null)
             {
                 return NotFound();
             }
 
-            _context.UTILIZADOR.Remove(utilizador);
+            _context.Utilizadores.Remove(utilizador);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
-       
-    
+
+        private bool UtilizadorExists(int id)
+        {
+            return _context.Utilizadores.Any(e => e.IdUtilizador == id);
+        }
     }
-}
+
+    }
