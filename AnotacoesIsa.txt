@@ -1,9 +1,3 @@
--Eu tentei fazer a conexão tanto com o somee quanto com o servidor local mas apresentou o erro:
-  The property or navigation 'formaDePagamento' cannot be added to the 'Promocao' type because a 
-  property or navigation with the same name already exists on the 'Promocao' type.
-
--Fora isso só fiz as controllers: Alarme, cuidador e utilizador;
-
 -Dei uma pesquisada sobre os modelos de projeto:
     • MVVM: Ideal para aplicações com interfaces mais complexas, onde você realmente precisa separar 
     a parte visual da lógica por trás.
@@ -19,3 +13,19 @@
     entre os componentes da aplicação.
     • Microservices: Perfeito para quando a aplicação precisa ser distribuída ou escalada, permitindo que diferentes 
     partes funcionem de forma independente, mas de maneira coordenada.
+
+  Controllers feitas:
+    -revisar metodos, pq eu copiei e colei a maioria;
+    -pra resolver o problema do swagger tem q fazer um DBO das classes
+
+  DataContext:
+    - acho que resolvi a maioria dos problemas que estava dando la.
+
+Comandos:
+  Migration
+  dotnet ef migrations add nomeMigation
+
+  Conexao
+  dotnet ef database update --connection "workstation id=Medicare.mssql.somee.com;packet size=4096;user id=Medicare_SQLLogin_1;pwd=Medicare06@@;data source=Medicare.mssql.somee.com;persist security info=False;initial catalog=Medicare;TrustServerCertificate=True",
+   
+  

@@ -1,14 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Medicare_API.Models
 {
     public class TipoUtilizador
     {
-        public int Id { get; set; }
+        [Key]
+        public int IdTipoUtilizador { get; set; }
         public string Descricao { get; set; }
-        public List<Utilizador> Utilizadores { get; set; }
+        [JsonIgnore]
+        public List<Utilizador> Utilizadores { get; set; } = new(); // Relacionamento 1:N com Utilizadores
     }
 }

@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ConexaoETEC")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SomeeConnection")));
 
 
 // Add services to the container.

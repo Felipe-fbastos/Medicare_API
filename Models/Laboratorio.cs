@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+
 
 namespace Medicare_API.Models
 {
     public class Laboratorio
     {
-        public int Id { get; set; }
+        [Key]
+        public int IdLaboratorio { get; set; }
         public string Nome { get; set; }
-        public List<Remedio> Remedios { get; set; }
+        public List<Remedio> Remedios { get; set; } = new();  // Relacionamento com Remedios
     }
 }

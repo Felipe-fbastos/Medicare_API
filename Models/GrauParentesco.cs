@@ -1,17 +1,15 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+
 
 namespace Medicare_API.Models
 {
     public class GrauParentesco
-    {
-        public int Id { get; set; }
+    {   
+        [Key]
+        public int IdGrauParentesco { get; set; }
         public string Descricao { get; set; }
-        public List<Responsavel> Responsavel { get; set; }
 
-        
+        public List<Responsavel> Responsavel { get; set; } = new(); // Relacionamento 1:N
     }
-
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -8,7 +7,6 @@ namespace Medicare_API.Models
 {
     public class Cuidador
     {
-        [Key]
         public int IdCuidador { get; set; }
         public Utilizador cuidador { get; set; }
         public int IdUtilizador { get; set; }
