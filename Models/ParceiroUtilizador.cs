@@ -9,14 +9,17 @@ namespace Medicare_API.Models
 {
     public class ParceiroUtilizador
     {
-        [Key]
-        [Column(Order = 1)]
-        public int IdParceiro { get; set; }
-        public Parceiro Parceiro { get; set; }
-        [Key]
-        [Column(Order = 2)]
-        public int IdUtilizador { get; set; }
-        public Utilizador colaborador { get; set; }
-        
+        public int IdParceiro { get; set; } // PK - FK
+        public Parceiro? Parceiro { get; set; }//FK - Relacionamento com Parceiro 
+
+        public int IdColaborador { get; set; } // PK - FK
+        public Utilizador? Colaborador { get; set; }//FK - Relacionamento com Utilizador 
+
+        public ParceiroUtilizador(int idParceiro, int idColaborador)
+        {
+            IdParceiro = idParceiro;
+            IdColaborador = idColaborador;
+        }
+
     }
 }

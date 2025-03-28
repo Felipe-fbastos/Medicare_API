@@ -1,15 +1,17 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 
 namespace Medicare_API.Models
 {
     public class GrauParentesco
-    {   
-        [Key]
-        public int IdGrauParentesco { get; set; }
-        public string Descricao { get; set; }
+    {
+        public required int IdGrauParentesco { get; set; } //PK
+        public required string Descricao { get; set; }
 
-        public List<Responsavel> Responsavel { get; set; } = new(); // Relacionamento 1:N
+        // Relacionamento 
+        [JsonIgnore]
+        public List<Responsavel> Responsavel { get; set; } = new();
     }
 }

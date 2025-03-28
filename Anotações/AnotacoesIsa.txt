@@ -14,18 +14,16 @@
     • Microservices: Perfeito para quando a aplicação precisa ser distribuída ou escalada, permitindo que diferentes 
     partes funcionem de forma independente, mas de maneira coordenada.
 
-  Controllers feitas:
-    -revisar metodos, pq eu copiei e colei a maioria;
-    -pra resolver o problema do swagger tem q fazer um DBO das classes
 
   DataContext:
     - acho que resolvi a maioria dos problemas que estava dando la.
+    - especifiquei td do nosso banco
 
 Comandos:
   Migration
   dotnet ef migrations add nomeMigation
 
   Conexao
-  dotnet ef database update --connection "workstation id=Medicare.mssql.somee.com;packet size=4096;user id=Medicare_SQLLogin_1;pwd=Medicare06@@;data source=Medicare.mssql.somee.com;persist security info=False;initial catalog=Medicare;TrustServerCertificate=True",
+  dotnet ef database update --connection "workstation id=Medicare.mssql.somee.com;packet size=4096;user id=Medicare_SQLLogin_1;pwd=Medicare06@@;data source=Medicare.mssql.somee.com;persist security info=False;initial catalog=Medicare;TrustServerCertificate=True"
    
   

@@ -1,259 +1,411 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Threading.Tasks;
-using Azure.Core.GeoJson;
 using Medicare_API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileSystemGlobbing;
-
-
-
 
 namespace Medicare_API.Data
 {
     public class DataContext : DbContext
     {
-        public DataContext(DbContextOptions<DataContext> options)
-            : base(options)
-        {
-
-        }
-
+        public DbSet<TipoUtilizador> TiposUtilizador { get; set; }
         public DbSet<Utilizador> Utilizadores { get; set; }
         public DbSet<Cuidador> Cuidadores { get; set; }
+        public DbSet<GrauParentesco> GrausParentesco { get; set; }
         public DbSet<Responsavel> Responsaveis { get; set; }
-        public DbSet<ParceiroUtilizador> ParceiroUtilizadores { get; set; }
         public DbSet<Parceiro> Parceiros { get; set; }
+        public DbSet<ParceiroUtilizador> ParceirosUtilizador { get; set; }
+        public DbSet<Laboratorio> Laboratorios { get; set; }
+        public DbSet<TipoOrdemGrandeza> TiposOrdemGrandeza { get; set; }
+        public DbSet<Remedio> Remedios { get; set; }
         public DbSet<Posologia> Posologias { get; set; }
-        public DbSet<Promocao> Promocoes { get; set; }
         public DbSet<Alarme> Alarmes { get; set; }
         public DbSet<HistoricoPosologia> HistoricosPosologia { get; set; }
-        public DbSet<Remedio> Remedios { get; set; }
-        public DbSet<TipoUtilizador> TipoUtilizadores { get; set; }
-        public DbSet<GrauParentesco> GrauParentesco { get; set; }
-        public DbSet<AlarmeStatus> AlarmeStatus { get; set; }
-        public DbSet<TipoOrdemGrandeza> TipoOrdemGrandeza { get; set; }
-        public DbSet<Laboratorio> Laboratorios { get; set; }
         public DbSet<FormaPagamento> FormasPagamento { get; set; }
+        public DbSet<Promocao> Promocoes { get; set; }
+
+        public DataContext(DbContextOptions<DataContext> options) : base(options)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            #region TipoUtilizador
+            modelBuilder.Entity<TipoUtilizador>(entity =>
+            {
+                entity.ToTable("TiposUtilizador");
 
-            #region Relacionamentos
-
-            // Chaves primárias compostas e configurações de relacionamento
-
-            // Relacionamento de Cuidador e Utilizador (Chave composta: IdUtilizador, IdCuidador)
-            modelBuilder.Entity<Cuidador>()
-                .HasKey(ph => new { ph.IdUtilizador, ph.IdCuidador }); // Definindo chave composta
-
-            modelBuilder.Entity<Cuidador>()
-                .HasOne(u => u.Utilizador) // Relacionando com Utilizador
-                .WithMany(c => c.Cuidadores)
-                .HasForeignKey(fkc => new { fkc.IdUtilizador, fkc.IdCuidador })
-                .OnDelete(DeleteBehavior.Restrict); // Comportamento de exclusão
+                entity.HasKey(e => e.IdTipoUtilizador);
 
 
-            // Relacionamento de Responsável e Utilizador (Chave composta: IdUtilizador, IdResponsavel)
-            modelBuilder.Entity<Responsavel>()
-                .HasKey(pk => new { pk.IdUtilizador, pk.IdResponsavel });
-
-            modelBuilder.Entity<Responsavel>()
-                .HasOne(u => u.Utilizador)
-                .WithMany(r => r.Responsaveis)
-                .HasForeignKey(fk => new { fk.IdUtilizador, fk.IdResponsavel })
-                .OnDelete(DeleteBehavior.Restrict); // Comportamento de exclusão
-
-
-            modelBuilder.Entity<Responsavel>()
-                .HasOne(gp => gp.GrauParentesco) // Relacionamento com GrauParentesco
-                .WithMany(re => re.Responsavel)
-                .HasForeignKey(fk => fk.IdGrauParentesco)
-                .OnDelete(DeleteBehavior.Restrict); // Comportamento de exclusão
-
-            // Relacionamento de ParceiroUtilizador e Parceiro (Chave composta: IdUtilizador, IdParceiro)
-            modelBuilder.Entity<ParceiroUtilizador>()
-                .HasKey(pu => new { pu.IdUtilizador, pu.IdParceiro }); // Definindo chave composta
-
-            modelBuilder.Entity<ParceiroUtilizador>()
-                .HasOne(c => c.Parceiro) // Relacionamento com Parceiro
-                .WithMany(p => p.ParceiroUtilizador)
-                .HasForeignKey(fk => fk.IdParceiro)
-                .OnDelete(DeleteBehavior.Restrict); // Comportamento de exclusão
-
-            modelBuilder.Entity<ParceiroUtilizador>()
-                .HasOne(c => c.colaborador) // Relacionamento com Colaborador
-                .WithMany(pu => pu.ParceiroUtilizadores)
-                .HasForeignKey(fk => fk.IdUtilizador)
-                .OnDelete(DeleteBehavior.Restrict); // Comportamento de exclusão
-
-            modelBuilder.Entity<Utilizador>()
-                .HasKey(u => u.IdUtilizador);
-
-            // Relacionamento de Utilizador com TipoUtilizador
-            modelBuilder.Entity<Utilizador>()
-                .HasOne(tp => tp.TipoUtilizador)
-                .WithMany(u => u.Utilizadores)
-                .HasForeignKey(fk => fk.IdTipoUtilizador)
-                .OnDelete(DeleteBehavior.Restrict); // Comportamento de exclusão
-
-
-            // Remedio (Chave composta: IdGrandeza, IdLaboratorio)
-            modelBuilder.Entity<Remedio>()
-                .HasKey(r => r.IdRemedio);
-
-            modelBuilder.Entity<Remedio>()
-                .HasOne(r => r.Grandeza)
-                .WithMany(t => t.Remedios)
-                .HasForeignKey(r => r.IdTipoOrdemGrandeza)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Remedio>()
-                .HasOne(r => r.laboratorio)
-                .WithMany(l => l.Remedios)
-                .HasForeignKey(r => r.IdLaboratorio)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Remedio>()
-                .HasMany(r => r.Posologias)
-                .WithOne(p => p.remedio)
-                .HasForeignKey(p => p.IdRemedio)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Remedio>()
-                .HasMany(r => r.HistoricoPosologias)
-                .WithOne(h => h.remedio)
-                .HasForeignKey(h => h.IdRemedio)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Remedio>()
-                .HasMany(r => r.Alarmes)
-                .WithOne(a => a.Remedio)
-                .HasForeignKey(a => a.IdRemedio)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Remedio>()
-                .HasMany(r => r.Promocoes)
-                .WithOne(p => p.remedio)
-                .HasForeignKey(p => p.IdRemedio)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Posologia (Chave composta: IdRemedio, IdUtilizador)
-            modelBuilder.Entity<Posologia>()
-                .HasKey(p => p.IdPosologia);
-
-            modelBuilder.Entity<Posologia>()
-                .HasMany(p => p.HistoricoPosologias)
-                .WithOne(h => h.posologia)
-                .HasForeignKey(h => h.IdPosologia)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Posologia>()
-                .HasMany(p => p.Alarmes)
-                .WithOne(a => a.Posologia)
-                .HasForeignKey(a => a.IdPosologia)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Posologia>()
-                .HasOne(p => p.remedio)
-                .WithMany(r => r.Posologias)
-                .HasForeignKey(p => p.IdRemedio)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Posologia>()
-                .HasOne(p => p.utilizador)
-                .WithMany(u => u.Posologias)
-                .HasForeignKey(p => p.IdUtilizador)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // HistóricoPosologia (Chave composta: IdPosologia, IdRemedio)
-            modelBuilder.Entity<HistoricoPosologia>()
-                .HasKey(h => new { h.IdPosologia, h.IdRemedio });
-
-            modelBuilder.Entity<HistoricoPosologia>()
-                .HasOne(h => h.posologia)
-                .WithMany(p => p.HistoricoPosologias)
-                .HasForeignKey(h => h.IdPosologia)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<HistoricoPosologia>()
-                .HasOne(h => h.remedio)
-                .WithMany(r => r.HistoricoPosologias)
-                .HasForeignKey(h => h.IdRemedio)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // AlarmeStatus
-            modelBuilder.Entity<AlarmeStatus>()
-                .HasKey(at => at.IdAlarmeStatus);
-
-            modelBuilder.Entity<AlarmeStatus>()
-                .HasMany(at => at.Alarmes)
-                .WithOne(a => a.Status)
-                .HasForeignKey(a => a.IdAlarme)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Alarme (Chave composta: IdPosologia, IdRemedio)
-            modelBuilder.Entity<Alarme>()
-                .HasKey(a => a.IdAlarme);
-
-            modelBuilder.Entity<Alarme>()
-                .HasOne(a => a.Posologia)
-                .WithMany(p => p.Alarmes)
-                .HasForeignKey(a => a.IdPosologia)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Alarme>()
-                .HasOne(a => a.Remedio)
-                .WithMany(r => r.Alarmes)
-                .HasForeignKey(a => a.IdRemedio)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Promoção (Chave composta: IdFormaDePagamento, IdColaborador, IdRemedio)
-            modelBuilder.Entity<Promocao>()
-                .HasKey(p => new { p.IdFormaDePagamento, p.IdColaborador, p.IdRemedio });
-
-            modelBuilder.Entity<Promocao>()
-                .HasOne(p => p.formaDePagamento)
-                .WithMany(f => f.Promocoes)
-                .HasForeignKey(p => p.IdFormaDePagamento)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Promocao>()
-                .HasOne(p => p.Colaborador)
-                .WithMany(u => u.Promocoes)
-                .HasForeignKey(p => p.IdColaborador)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Promocao>()
-                .HasOne(p => p.remedio)
-                .WithMany(r => r.Promocoes)
-                .HasForeignKey(p => p.IdRemedio)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Forma de Pagamento
-            modelBuilder.Entity<FormaPagamento>()
-                .HasKey(fp => fp.IdFormaPagamento);
-
-            modelBuilder.Entity<FormaPagamento>()
-                .HasMany(fp => fp.Promocoes)
-                .WithOne(p => p.formaDePagamento)
-                .HasForeignKey(p => p.IdFormaDePagamento)
-                .OnDelete(DeleteBehavior.Restrict);
-        
+                entity.Property(e => e.Descricao)
+                      .HasMaxLength(14)
+                      .IsRequired();
+            });
             #endregion
 
+            #region Utilizador
+            modelBuilder.Entity<Utilizador>(entity =>
+            {
+                entity.ToTable("Utilizadores"); ;
+                entity.HasKey(e => e.IdUtilizador);
+
+                entity.Property(e => e.CPF)
+                      .HasMaxLength(14)
+                      .IsRequired();
+
+                entity.Property(e => e.Nome)
+                      .HasMaxLength(40)
+                      .IsRequired();
+
+                entity.Property(e => e.Sobrenome)
+                      .HasMaxLength(40)
+                      .IsRequired();
+
+                entity.Property(e => e.DtNascimento)
+                      .IsRequired();
+
+                entity.Property(e => e.Email)
+                      .HasMaxLength(255)
+                      .IsRequired();
+
+                entity.Property(e => e.Telefone)
+                      .HasMaxLength(11)
+                      .IsRequired(false);
+
+                entity.HasOne(e => e.TipoUtilizador)
+                      .WithMany(u => u.Utilizadores)
+                      .HasForeignKey(e => e.IdTipoUtilizador)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+
+
+
+                entity.HasIndex(e => new { e.CPF, e.IdTipoUtilizador }).IsUnique(); // CPF único por tipo de utilizador
+            });
+            #endregion
+
+            #region Cuidador
+            modelBuilder.Entity<Cuidador>(entity =>
+            {
+                entity.ToTable("Cuidadores");
+
+                entity.HasKey(e => new { e.IdCuidador, e.IdUtilizador });
+
+                entity.Property(e => e.DtInicio)
+                      .IsRequired();
+
+                entity.Property(e => e.DtFim)
+                      .IsRequired(false);
+
+                entity.Property(e => e.DcCuidador)
+                      .IsRequired();
+
+                entity.Property(e => e.DuCuidador)
+                      .IsRequired();
+
+                entity.Property(e => e.StCuidador)
+                      .HasMaxLength(1)
+                      .IsRequired();
+
+                entity.HasOne(e => e.Utilizador)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdUtilizador)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.CuidadorUtilizador)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdCuidador)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+            #endregion
+
+            #region GrauParentesco
+            modelBuilder.Entity<GrauParentesco>(entity =>
+             {
+                 entity.ToTable("GrausParentesco");
+
+                 entity.HasKey(e => e.IdGrauParentesco);
+
+                 entity.Property(e => e.Descricao)
+                       .HasMaxLength(15)
+                       .IsRequired();
+             });
+            #endregion
+
+            #region Responsavel
+            modelBuilder.Entity<Responsavel>(entity =>
+            {
+                entity.ToTable("Responsaveis");
+
+                entity.HasKey(e => new { e.IdResponsavel, e.IdUtilizador });
+
+                entity.Property(e => e.DcResponsavel)
+                        .IsRequired();
+
+                entity.Property(e => e.DuResponsavel)
+                        .IsRequired();
+
+                entity.Property(e => e.StResponsavel)
+                        .HasMaxLength(1)
+                        .IsRequired();
+
+                entity.HasOne(e => e.Utilizador)
+                        .WithMany()
+                        .HasForeignKey(e => e.IdUtilizador)
+                        .IsRequired()
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.ResponsavelUtilizador)
+                        .WithMany()
+                        .HasForeignKey(e => e.IdResponsavel)
+                        .IsRequired()
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.GrauParentesco)
+                        .WithMany(re => re.Responsavel)
+                        .HasForeignKey(e => e.IdGrauParentesco)
+                        .IsRequired()
+                        .OnDelete(DeleteBehavior.Restrict);
+            });
+            #endregion
+
+            #region Parceiro
+            modelBuilder.Entity<Parceiro>(entity =>
+            {
+                entity.ToTable("Parceiros");
+
+                entity.HasKey(e => e.IdParceiro);
+
+                entity.Property(e => e.NomeParceiro)
+                    .HasMaxLength(50)
+                    .IsRequired();
+
+                entity.Property(e => e.ApelidoParceiro)
+                    .HasMaxLength(25)
+                    .IsRequired();
+
+                entity.Property(e => e.CNPJParceiro)
+                    .HasMaxLength(18)
+                    .IsRequired();
+
+                entity.HasIndex(e => e.CNPJParceiro).IsUnique(); // CNPJ único
+            });
+            #endregion
+
+
+            #region ParceiroUtilizador
+            modelBuilder.Entity<ParceiroUtilizador>(entity =>
+            {
+                entity.ToTable("ParceirosUtilizadores");
+
+                entity.HasKey(e => new { e.IdParceiro, e.IdColaborador });
+
+                entity.HasOne(e => e.Parceiro)
+                        .WithMany()
+                        .HasForeignKey(e => e.IdParceiro)
+                        .IsRequired()
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Colaborador)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdColaborador)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+            #endregion
+
+            #region  Laboratorio
+            modelBuilder.Entity<Laboratorio>(entity =>
+            {
+                entity.ToTable("Laboratorios");
+
+                entity.HasKey(e => e.IdLaboratorio);
+
+                entity.Property(e => e.Nome)
+                      .HasMaxLength(50)
+                      .IsRequired();
+            });
+            #endregion 
+
+            #region TipoOrdemGrandeza
+            modelBuilder.Entity<TipoOrdemGrandeza>(entity =>
+            {
+                entity.ToTable("TiposOrdemGrandeza");
+
+                entity.HasKey(e => e.IdTipoOrdemGrandeza);
+
+                entity.Property(e => e.Descricao)
+                      .HasMaxLength(25)
+                      .IsRequired();
+
+                entity.Property(e => e.Simbolos)
+                      .HasMaxLength(4)
+                      .IsRequired();
+            });
+            #endregion
+
+            #region Remedio
+            modelBuilder.Entity<Remedio>(entity =>
+            {
+                entity.ToTable("Remedios");
+
+                entity.HasKey(e => e.IdRemedio);
+
+                entity.Property(e => e.NomeRemedio)
+                      .HasMaxLength(255)
+                      .IsRequired();
+
+                entity.Property(e => e.Anotacao)
+                      .IsRequired();
+
+                entity.Property(e => e.Dosagem)
+                      .IsRequired();
+
+                entity.Property(e => e.DtRegistro)
+                      .IsRequired();
+
+                entity.Property(e => e.QtdAlerta)
+                      .IsRequired();
+
+                entity.HasOne(e => e.TipoOrdemGrandeza)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdTipoOrdemGrandeza)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Laboratorio)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdLaboratorio)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+            #endregion
+
+            #region Posologia
+            modelBuilder.Entity<Posologia>(entity =>
+            {
+                entity.ToTable("Posologias");
+
+                entity.HasKey(e => e.IdPosologia);
+
+                entity.Property(e => e.DtInicio)
+                      .IsRequired();
+
+                entity.Property(e => e.Intervalo)
+                      .IsRequired();
+
+                entity.Property(e => e.QtdRemedio)
+                      .IsRequired();
+
+                entity.HasOne(e => e.Remedio)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdRemedio)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Utilizador)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdUtilizador)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+            #endregion
+
+            #region Alarme
+            modelBuilder.Entity<Alarme>(entity =>
+            {
+                entity.ToTable("Alarmes");
+
+                entity.HasKey(e => e.IdAlarme);
+
+                entity.Property(e => e.DtHoraAlarme)
+                      .IsRequired();
+
+                entity.Property(e => e.StAlarme)
+                      .HasMaxLength(50)
+                      .IsRequired();
+
+                entity.HasOne(e => e.Posologia)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdPosologia)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Remedio)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdRemedio)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+            #endregion
+
+            #region HistoricoPosologia
+            modelBuilder.Entity<HistoricoPosologia>(entity =>
+            {
+                entity.ToTable("HistoricosPosologia");
+
+                entity.HasKey(e => new { e.IdPosologia, e.IdRemedio });
+
+                entity.Property(e => e.SdPosologia)
+                      .IsRequired();
+
+                entity.HasOne(e => e.Posologia)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdPosologia)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Remedio)
+                      .WithMany()
+                      .HasForeignKey(e => e.IdRemedio)
+                      .IsRequired()
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+            #endregion
+
+            #region FormaPagamento
+            modelBuilder.Entity<FormaPagamento>(entity =>
+            {
+                entity.ToTable("FormasPagamento");
+
+                entity.HasKey(e => e.IdFormaPagamento);
+
+                entity.Property(e => e.Descricao)
+                      .HasMaxLength(45)
+                      .IsRequired();
+
+                entity.Property(e => e.QtdParcelas)
+                      .IsRequired();
+
+                entity.Property(e => e.QtdMinimaParcelas)
+                      .IsRequired();
+            });
+            #endregion
+
+            #region Promocao
+            modelBuilder.Entity<Promocao>(entity =>
+            {
+                entity.ToTable("Promocoes");
+                entity.HasKey(e => e.IdPromocao);
+
+                entity.Property(e => e.Descricao)
+                      .HasMaxLength(40)
+                      .IsRequired();
+
+                entity.Property(e => e.DtInicio)
+                      .IsRequired();
+
+                entity.Property(e => e.DtFim)
+                      .IsRequired();
+
+                entity.Property(e => e.Valor)
+                      .IsRequired();
+            });
+            #endregion
+
+            base.OnModelCreating(modelBuilder);
+
             #region Seed de Dados
-
-            // Seed para AlarmeStatus
-            modelBuilder.Entity<AlarmeStatus>().HasData(
-                new AlarmeStatus { IdAlarmeStatus = 1, Descricao = "Ativo" },
-                new AlarmeStatus { IdAlarmeStatus = 2, Descricao = "Inativo" }
-            );
-
-            // Seed para TipoUtilizador
             modelBuilder.Entity<TipoUtilizador>().HasData(
                 new TipoUtilizador { IdTipoUtilizador = 1, Descricao = "Utilizador" },
                 new TipoUtilizador { IdTipoUtilizador = 2, Descricao = "Cuidador" },
@@ -261,7 +413,6 @@ namespace Medicare_API.Data
                 new TipoUtilizador { IdTipoUtilizador = 4, Descricao = "Parceiro" }
             );
 
-            // Seed para GrauParentesco
             modelBuilder.Entity<GrauParentesco>().HasData(
                 new GrauParentesco { IdGrauParentesco = 1, Descricao = "Pai" },
                 new GrauParentesco { IdGrauParentesco = 2, Descricao = "Mãe" },
@@ -280,31 +431,28 @@ namespace Medicare_API.Data
                 new GrauParentesco { IdGrauParentesco = 15, Descricao = "Companheira" }
             );
 
-            // Seed para TipoOrdemGrandeza (Unidades de Medida para Medicamentos)
             modelBuilder.Entity<TipoOrdemGrandeza>().HasData(
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 1, Descricao = "Miligrama" }, // mg
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 2, Descricao = "Gramas" }, // g
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 3, Descricao = "Litros" }, // L
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 4, Descricao = "Mililitros" }, // mL
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 5, Descricao = "Centímetros cúbicos" }, // cm³
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 6, Descricao = "Unidades internacionais" }, // UI (unidades específicas para vitaminas e hormônios
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 7, Descricao = "Micrograma" }, // mcg
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 8, Descricao = "Quilograma" }, // kg
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 9, Descricao = "Unidade" }, // Unidade (geral para comprimidos, cápsulas, etc.)
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 10, Descricao = "Pipeta" }, // Quantidade medida com pipeta (ex. gotas)
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 11, Descricao = "Tabletes" }, // Tabletes (geral para formas sólidas)
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 12, Descricao = "Doses" }, // Doses específicas (ex. vacina)
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 13, Descricao = "Miliunidade" }, // Miliunidade, usado para medicamentos biológicos
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 14, Descricao = "Cápsulas" }, // Cápsulas de medicamento
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 15, Descricao = "Soluções" }, // Soluções (medicamento diluído)
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 16, Descricao = "Gotas" }, // Gotas (frequente em medicamentos líquidos)
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 17, Descricao = "Miliquilos" }, // mL (reforçando unidade de líquidos)
-                new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 18, Descricao = "Injeções" } // Injeções (para medicamentos parenterais)
-            );
+                 new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 1, Descricao = "Miligrama", Simbolos = "mg" },
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 2, Descricao = "Gramas", Simbolos = "g" },
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 3, Descricao = "Litros", Simbolos = "L" },
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 4, Descricao = "Mililitros", Simbolos = "mL" },
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 5, Descricao = "Centímetros cúbicos", Simbolos = "cm³" },
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 6, Descricao = "Unidades internacionais", Simbolos = "UI" },
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 7, Descricao = "Micrograma", Simbolos = "mcg" },
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 8, Descricao = "Quilograma", Simbolos = "kg" },
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 9, Descricao = "Unidade", Simbolos = "un" },
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 10, Descricao = "Pipeta", Simbolos = "gota" }, // Quantidade medida com pipeta (ex. gotas)
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 11, Descricao = "Tabletes", Simbolos = "un" }, // Tabletes (geral para formas sólidas)
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 12, Descricao = "Doses", Simbolos = "Dose" }, // Doses específicas (ex. vacina)
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 13, Descricao = "Miliunidade", Simbolos = "mUI" }, // Miliunidade, usado para medicamentos biológicos
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 14, Descricao = "Cápsulas", Simbolos = "un" }, // Cápsulas de medicamento
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 15, Descricao = "Soluções", Simbolos = "Sol." }, // Soluções (medicamento diluído)
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 16, Descricao = "Gotas", Simbolos = "gota" }, // Gotas (frequente em medicamentos líquidos)
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 17, Descricao = "Miliquilos", Simbolos = "mL" }, // mL (reforçando unidade de líquidos)
+            new TipoOrdemGrandeza { IdTipoOrdemGrandeza = 18, Descricao = "Injeções", Simbolos = "un" } // Injeções (para medicamentos parenterais)
+        );
 
-            
             #endregion
         }
-
     }
 }

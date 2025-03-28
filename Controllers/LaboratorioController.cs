@@ -3,7 +3,6 @@ using Medicare_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Medicare_API.Models
 {
     [Route("[controller]")]
@@ -20,63 +19,112 @@ namespace Medicare_API.Models
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Laboratorio>>> GetLaboratorios()
         {
-            var laboratoriosList = await _context.Laboratorios.ToListAsync();
-            if (laboratoriosList == null)
+            try
             {
-                return NotFound();
-            }
+                var laboratoriosList = await _context.Laboratorios.ToListAsync();
+                if (laboratoriosList == null || !laboratoriosList.Any())
+                {
+                    return NotFound();
+                }
 
-            return Ok(laboratoriosList);
+                return Ok(laboratoriosList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Laboratorio>> GetLaboratorio(int id)
         {
-            var laboratorio = await _context.Laboratorios.FindAsync(id);
-            if (laboratorio == null)
+            try
             {
-                return NotFound();
-            }
+                var laboratorio = await _context.Laboratorios.FindAsync(id);
+                if (laboratorio == null)
+                {
+                    return NotFound();
+                }
 
-            return Ok(laboratorio);
+                return Ok(laboratorio);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<Laboratorio>> PostLaboratorio(Laboratorio laboratorio)
         {
-            _context.Laboratorios.Add(laboratorio);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetLaboratorio), new { id = laboratorio.IdLaboratorio }, laboratorio);
+            try
+            {
+                _context.Laboratorios.Add(laboratorio);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetLaboratorio), new { id = laboratorio.IdLaboratorio }, laboratorio);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLaboratorio(int id, Laboratorio laboratorio)
         {
-            if (id != laboratorio.IdLaboratorio)
+            try
             {
-                return BadRequest();
+                var laboratorioExistente = await _context.Laboratorios
+                    .FirstOrDefaultAsync(l => l.IdLaboratorio  == id);
+
+
+                if (laboratorioExistente == null)
+                {
+                    return NotFound($"Laboratório com o id {id} não encontrado.");
+                }
+
+                _context.Entry(laboratorio).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.Entry(laboratorio).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Laboratorios.Any(l => l.IdLaboratorio == id))
+                {
+                    return NotFound("Laboratório não encontrado.");
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLaboratorio(int id)
         {
-            var laboratorio = await _context.Laboratorios.FindAsync(id);
-            if (laboratorio == null)
+            try
             {
-                return NotFound();
+                var laboratorio = await _context.Laboratorios.FindAsync(id);
+                if (laboratorio == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Laboratorios.Remove(laboratorio);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.Laboratorios.Remove(laboratorio);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
-
 }

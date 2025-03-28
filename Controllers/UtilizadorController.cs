@@ -3,10 +3,9 @@ using Medicare_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Medicare_API.Controller
 {
-   [Route("[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class UtilizadorController : ControllerBase
     {
@@ -17,87 +16,179 @@ namespace Medicare_API.Controller
             _context = context;
         }
 
-        // GET: api/Utilizador
+        #region GET Utilizadores
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Utilizador>>> GetUtilizadores()
         {
-            return await _context.Utilizadores.ToListAsync();
-        }
-
-        // GET: api/Utilizador/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Utilizador>> GetUtilizador(int id)
-        {
-            var utilizador = await _context.Utilizadores.FindAsync(id);
-
-            if (utilizador == null)
-            {
-                return NotFound();
-            }
-
-            return utilizador;
-        }
-
-        // PUT: api/Utilizador/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUtilizador(int id, Utilizador utilizador)
-        {
-            if (id != utilizador.IdUtilizador)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(utilizador).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UtilizadorExists(id))
+                var utilizadores = await _context.Utilizadores.ToListAsync();
+                if (utilizadores == null || utilizadores.Count == 0)
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                return Ok(utilizadores);
             }
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao buscar utilizadores: {ex.Message}");
+            }
         }
+        #endregion
 
-        // POST: api/Utilizador
-        [HttpPost]
-        public async Task<ActionResult<Utilizador>> PostUtilizador(Utilizador utilizador)
+        #region GET Utilizador by ID
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Utilizador>> GetUtilizador(int id)
         {
-            _context.Utilizadores.Add(utilizador);
-            await _context.SaveChangesAsync();
+            try
+            {
+                var utilizador = await _context.Utilizadores.FindAsync(id);
+                if (utilizador == null)
+                {
+                    return NotFound();
+                }
 
-            return CreatedAtAction(nameof(GetUtilizador), new { id = utilizador.IdUtilizador }, utilizador);
+                return Ok(utilizador);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao buscar utilizador: {ex.Message}");
+            }
         }
+        #endregion
 
-        // DELETE: api/Utilizador/5
+        #region PUT Utilizador
+        [HttpPut("{id}")]
+        public async Task<IActionResult> AtualizarUtilizador(int id, [FromBody] UtilizadorUpdateDTO utilizadorDTO)
+        {
+            try
+            {
+                // Verificar se o IdTipoUtilizador foi enviado
+                if (utilizadorDTO.IdTipoUtilizador == 0)
+                {
+                    return BadRequest("O IdTipoUtilizador é obrigatório.");
+                }
+
+                // Buscar o Utilizador pelo Id
+                var utilizador = await _context.Utilizadores
+                    .Include(u => u.TipoUtilizador) // Inclui o TipoUtilizador para garantir que ele seja carregado
+                    .FirstOrDefaultAsync(u => u.IdUtilizador == id);
+
+                // Se o Utilizador não for encontrado, retornar erro
+                if (utilizador == null)
+                {
+                    return NotFound($"Utilizador com id {id} não encontrado.");
+                }
+
+                // Verificar se o TipoUtilizador existe no banco
+                var tipoUtilizador = await _context.TiposUtilizador
+                    .FirstOrDefaultAsync(t => t.IdTipoUtilizador == utilizadorDTO.IdTipoUtilizador);
+
+                if (tipoUtilizador == null)
+                {
+                    return BadRequest("Tipo de Utilizador não encontrado.");
+                }
+
+                // Atualizar os campos do Utilizador com os valores do DTO
+                utilizador.IdTipoUtilizador = utilizadorDTO.IdTipoUtilizador;
+                utilizador.TipoUtilizador = tipoUtilizador; // Atualiza a navegação
+                utilizador.CPF = utilizadorDTO.CPF;
+                utilizador.Nome = utilizadorDTO.Nome;
+                utilizador.Sobrenome = utilizadorDTO.Sobrenome;
+                utilizador.DtNascimento = utilizadorDTO.DtNascimento;
+                utilizador.Email = utilizadorDTO.Email;
+                utilizador.Telefone = utilizadorDTO.Telefone;
+
+                // Marcar o contexto para salvar as alterações
+                _context.Utilizadores.Update(utilizador);
+
+                // Salvar as mudanças no banco de dados
+                await _context.SaveChangesAsync();
+
+                // Retornar a resposta com o utilizador atualizado
+                return Ok(utilizador);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao atualizar utilizador: {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region POST Utilizador
+        [HttpPost]
+        public async Task<IActionResult> CriarUtilizador([FromBody] UtilizadorCreateDTO utilizadorDTO)
+        {
+            try
+            {
+                // Buscar o TipoUtilizador com base no IdTipoUtilizador
+                var tipoUtilizador = await _context.TiposUtilizador
+                    .FirstOrDefaultAsync(t => t.IdTipoUtilizador == utilizadorDTO.IdTipoUtilizador);
+
+                // Se o TipoUtilizador não for encontrado, retornar erro
+                if (tipoUtilizador == null)
+                {
+                    return BadRequest("O IdTipoUtilizador informado não existe.");
+                }
+
+                // Criar o Utilizador e preencher os dados
+                var utilizador = new Utilizador(
+                    idTipoUtilizador: utilizadorDTO.IdTipoUtilizador,
+                    cpf: utilizadorDTO.CPF,
+                    nome: utilizadorDTO.Nome,
+                    sobrenome: utilizadorDTO.Sobrenome,
+                    dtNascimento: utilizadorDTO.DtNascimento,
+                    email: utilizadorDTO.Email,
+                    telefone: utilizadorDTO.Telefone
+                );
+
+                // Associar o TipoUtilizador ao Utilizador
+                utilizador.TipoUtilizador = tipoUtilizador; // Aqui o EF preenche a navegação com o TipoUtilizador carregado
+
+                // Adicionar o Utilizador ao contexto e salvar
+                _context.Utilizadores.Add(utilizador);
+                await _context.SaveChangesAsync();
+
+                // Retornar o Utilizador criado
+                return CreatedAtAction(nameof(GetUtilizador), new { id = utilizador.IdUtilizador }, utilizador);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao criar utilizador: {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region DELETE Utilizador
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUtilizador(int id)
         {
-            var utilizador = await _context.Utilizadores.FindAsync(id);
-            if (utilizador == null)
+            try
             {
-                return NotFound();
+                var utilizador = await _context.Utilizadores.FindAsync(id);
+                if (utilizador == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Utilizadores.Remove(utilizador);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.Utilizadores.Remove(utilizador);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao excluir utilizador: {ex.Message}");
+            }
         }
+        #endregion
 
+        #region Métodos Auxiliares
         private bool UtilizadorExists(int id)
         {
             return _context.Utilizadores.Any(e => e.IdUtilizador == id);
         }
+        #endregion
     }
-
-    }
+}

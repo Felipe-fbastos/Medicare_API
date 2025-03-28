@@ -1,18 +1,20 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 
 namespace Medicare_API.Models
 {
     public class Parceiro
     {
-        [Key]
-        public int IdParceiro { get; set; }
-        public string Nome { get; set; }
-        public string Apelido { get; set; }
-        public string CNPJ { get; set; }
+        public required int IdParceiro { get; set; } //PK
+        public required string NomeParceiro { get; set; }
+        public required string ApelidoParceiro { get; set; }
+        public required string CNPJParceiro { get; set; }
 
-        public List<ParceiroUtilizador> ParceiroUtilizador { get; set; } = new(); // Relacionamento 1:N
+        // Relacionamento
+        [JsonIgnore]
+        public List<ParceiroUtilizador> ParceiroUtilizador { get; set; } = new();
     }
 
 }

@@ -3,16 +3,27 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Medicare_API.Models
 {
-    
+
     public class Alarme
     {
-        [Key]
-        public int IdAlarme { get; set; }
-        public int IdPosologia { get; set; }  // Chave estrangeira para Posologia
-        public Posologia Posologia { get; set; }  // Relacionamento com Posologia
-        public int IdRemedio { get; set; }  // Chave estrangeira para Remedio
-        public Remedio Remedio { get; set; }  // Relacionamento com Remedio
+        public int IdAlarme { get; set; }//PK
+
+        public int IdPosologia { get; set; } //FK
+        public Posologia? Posologia { get; set; } //FK - Relacionamento com Posologia
+
+        public int IdRemedio { get; set; }  //FK
+        public Remedio? Remedio { get; set; } //FK - Relacionamento com Remedio
+
         public DateTime DtHoraAlarme { get; set; }
-        public AlarmeStatus Status { get; set; }  // Usando o enum para representar o status
+        public string StAlarme { get; set; }
+
+        public Alarme(int idAlarme, int idPosologia, int idRemedio, DateTime dtHoraAlarme, string stAlarme)
+        {
+            IdAlarme = idAlarme;
+            IdPosologia = idPosologia;
+            IdRemedio = idRemedio;
+            DtHoraAlarme = dtHoraAlarme;
+            StAlarme = stAlarme;
+        }
     }
 }
