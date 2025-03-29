@@ -8,4 +8,6 @@ public class UtilizadorCreateDTO
     public required DateTime DtNascimento { get; set; }
     public required string Email { get; set; }
     public required string Telefone { get; set; }
+    public required string SenhaString { get; set
+    ; }
 }

@@ -143,6 +143,7 @@ namespace Medicare_API.Models
                 var utilizadorDt = await _context.Utilizadores
                     .FirstOrDefaultAsync(u => u.IdUtilizador == cuidadorDTO.IdUtilizador);
 
+                
                 // 3. Se o TipoUtilizador não for encontrado, retornar erro
                 if (cuidadorDt == null || utilizadorDt == null)
                 {

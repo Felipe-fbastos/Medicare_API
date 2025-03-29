@@ -11,6 +11,17 @@ namespace Medicare_API.Models
 {
     public class Utilizador
     {
+/*
+        public Utilizador(int idTipoUtilizador, string cpf, string nome, string sobrenome, DateTime dtNascimento, string email, string telefone)
+        {
+            this.IdTipoUtilizador = idTipoUtilizador;
+            this.CPF = cpf;
+            this.Nome = nome;
+            this.Sobrenome = sobrenome;
+            this.DtNascimento = dtNascimento;
+            this.Email = email;
+            this.Telefone = telefone;
+        }*/
         public int IdUtilizador { get; set; }   //PK
         public  int IdTipoUtilizador { get; set; }  //FK
         public TipoUtilizador? TipoUtilizador { get; set; } // FK - Navegação para TipoUtilizador 
@@ -20,6 +31,12 @@ namespace Medicare_API.Models
         public  string Nome { get; set; }
         public  string Sobrenome { get; set; }
         public  DateTime DtNascimento { get; set; }
+
+        public byte[]? SenhaHash; 
+        public byte[]? SenhaSalt;
+
+        [NotMapped]
+        public string SenhaString; 
         public  string Email { get; set; }
         public string Telefone { get; set; }
         // Futuro colocar perfil médico -> Altura, peso, tipoSanguineo, alergia...
@@ -31,16 +48,7 @@ namespace Medicare_API.Models
         public List<Posologia> Posologias { get; set; } = new();
         public List<Promocao> Promocoes { get; set; } = new();
 
-        public Utilizador(int idTipoUtilizador, string cpf, string nome, string sobrenome, DateTime dtNascimento, string email, string telefone)
-        {
-            IdTipoUtilizador = idTipoUtilizador;
-            CPF = cpf;
-            Nome = nome;
-            Sobrenome = sobrenome;
-            DtNascimento = dtNascimento;
-            Email = email;
-            Telefone = telefone;
-        }
+        
 
     }
 }
